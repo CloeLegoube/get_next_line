@@ -15,6 +15,22 @@ typedef	struct	s_var
 	struct s_var	*next;
 }				t_var;
 
+typedef	struct	s_buff
+{
+	char 			*new_buff;
+	char 			*line;
+	int				count_char;
+	struct s_buff	*next;
+}				t_buff;
+
+typedef	struct	s_list
+{
+	void			*content;
+	size_t			content_size;
+	struct s_list	*next;
+}				t_list;
+
+
 int			get_next_line(const int fd, char **line);
 char		*ft_strsub(char const *s, unsigned int start, size_t len);
 void		ft_putstr(char const *s);
@@ -25,5 +41,6 @@ char		**ft_strsplit(char const *str, char charset);
 char		*ft_concat_tab(char **tab);
 char		*ft_strcat(char *s1, const char *s2);
 void		ft_print_words_tables(char **tab);
+void		ft_memdel(void **ap);
 
 #endif

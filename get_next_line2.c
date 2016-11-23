@@ -69,86 +69,50 @@ int		get_next_line(const int fd, char **line)
 	static char	*next_buff;
 	char		**tab;
 
-
-	if (next_buff)
+	while ((count_char = read(fd, buff, BUFF_SIZE)))
 	{
-		tab = ft_strsplit(next_buff, '\n');
-		if (len_tab(tab) > 1)
+		i = -1;
+		while (++i < count_char)
 		{
-			ft_memdel((void *)line);
-			*line = (char *)malloc((ft_strlen(tab[0]) + 1) * sizeof(*line));
-			*line = tab[0];
-			ft_memdel((void *)&next_buff);
-			next_buff = ft_concat_tab(tab);
-			ft_memdel((void **)tab);
-		}
-	}
-	else
-	{
-		count_char = read(fd, buff, BUFF_SIZE);
-		if (count_char)
-		{
-			i = -1;
-			while (++i < count_char)
-			{
-				printf("i = %d \n", i);
-				if (buff[i] == '\n')
-				{
-					printf("|8|Point ");
-					if (next_buff)
-					{
-						printf("|7|Point ");
-						//printf("Debut_buff <%s> Fin_buff\n", next_buff);
-						tab = ft_strsplit(next_buff, '\n');
-						//ft_print_words_tables(tab);
-						if (len_tab(tab) > 1)
-						{
-							ft_memdel((void *)line);
-							*line = (char *)malloc((ft_strlen(tab[0]) + 1) * sizeof(*line));
-							*line = tab[0];
-							ft_memdel((void *)&next_buff);
-							next_buff = ft_concat_tab(tab);
-							ft_memdel((void **)tab);
-							printf("|2|Point ");
-							//printf("\n<<%s>>\n", next_buff);
-						}
-						else
-						{
-							printf("|3|Point ");
-							ft_memdel((void *)line);
-							*line = ft_strjoin(next_buff, ft_strsub(buff, 0, i));
-							ft_memdel((void *)&next_buff);
-						}
-					}
-					else
-					{
-						printf("|1|Point ");
-						*line = ft_strsub(buff, 0, i);
-						next_buff = ft_strsub(buff, i + 1, (count_char - i - 1));
-					}
-					return (1);
-				}
-				else if (buff[i] == '\0')
-				{
-					printf("|4|Point ");
-					*line = ft_strsub(buff, 0, i);
-					return (0);
-				}
-			}
-			if (i == count_char)
+			if (buff[i] == '\n')
 			{
 				if (next_buff)
 				{
-					printf("|5|Point ");
-					*line = ft_strjoin(next_buff, ft_strsub(buff, 0, i));
+					tab = ft_strsplit(next_buff, '\n');
+					if (len_tab(tab) > 1)
+					{
+						ft_memdel((void *)line);
+						*line = (char *)malloc((ft_strlen(tab[0]) + 1) * sizeof(*line));
+						*line = tab[0];
+						ft_memdel((void *)&next_buff);
+						next_buff = ft_concat_tab(tab);
+					}
+					else
+					{
+						ft_memdel((void *)line);
+						*line = ft_strjoin(next_buff, ft_strsub(buff, 0, i));
+						ft_memdel((void *)&next_buff);
+					}
 				}
 				else
 				{
-					printf("|6|Point ");
-					next_buff = ft_strsub(buff, 0, count_char);
+					*line = ft_strsub(buff, 0, i);
+					next_buff = ft_strsub(buff, i + 1, (count_char - i - 1));
 				}
+				return (1);
 			}
-			count_char = read(fd, buff, BUFF_SIZE);
+			else if (buff[i] == '\0')
+			{
+				*line = ft_strsub(buff, 0, i);
+				return (0);
+			}
+		}
+		if (i == count_char)
+		{
+			if (next_buff)
+				*line = ft_strjoin(next_buff, ft_strsub(buff, 0, i));
+			else
+				next_buff = ft_strsub(buff, 0, count_char);
 		}
 	}
 	return (-1);
