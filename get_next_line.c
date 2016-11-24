@@ -5,7 +5,7 @@ int		get_next_line(const int fd, char **line)
 {
 	int				ret;
 	int				i;
-	// int				j;
+	int				j;
 	char			buf[BUFF_SIZE + 1];
 	static t_list	**stock = NULL;
 	t_list			*new;
@@ -62,7 +62,6 @@ int		get_next_line(const int fd, char **line)
 			{
 				if (stock->next != NULL)
 				{
-					printf("|2|Point ");
 					ft_memdel((void *)line);
 					*line = ft_strnew(i);
 					*line = ft_strjoin(stock->content, ft_strsub(buf, 0, i));
@@ -71,7 +70,6 @@ int		get_next_line(const int fd, char **line)
 				}
 				else
 				{
-					printf("|1|Point ");
 					ft_memdel((void *)line);
 					*line = ft_strnew(i);
 					*line = ft_strsub(buf, 0, i);
