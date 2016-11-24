@@ -1,154 +1,109 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-static int		len_tab(char **tab)
-{
-	int i;
-
-	i = 0;
-	while(tab[i])
-		i++;
-	return (i);
-}
-
-int		ft_count_char(char **tab)
-{
-	int		i;
-	int		j;
-	int		count;
-
-	i = 1;
-	count = 0;
-	while (tab[i])
-	{
-		j = 0;
-		while (tab[i][j])
-		{
-			count++;
-			j++;
-		}
-
-		count++;
-		i++;
-	}
-	return (count);
-}
-
-char			*ft_concat_tab(char **tab)
-{
-	char	*string;
-	int		i;
-	int		j;
-	int		count;
-
-	count = ft_count_char(tab);
-	if (!(string = (char*)malloc(sizeof(char) * count + 1)))
-		return (NULL);
-	i = 1;
-	count = 0;
-	while (tab[i])
-	{
-		j = 0;
-		while (tab[i][j])
-		{
-			string[count++] = tab[i][j];
-			j++;
-		}
-		string[count++] = i < (len_tab(tab) - 1) ? '\n' : 0;
-		i++;
-	}
-	//printf("String <%s> Fin_string\n", string);
-	return (string);
-}
-
 int		get_next_line(const int fd, char **line)
 {
-	int			count_char;
-	int			i;
-	char		buff[BUFF_SIZE + 1];
-	static char	*next_buff;
-	char		**tab;
+	int				ret;
+	int				i;
+	// int				j;
+	char			buf[BUFF_SIZE + 1];
+	static t_list	**stock = NULL;
+	t_list			*new;
 
-
-	if (next_buff)
+	ret = 0;
+	/*
+	** -----------------------------------------------------------------------------------------------
+	** 								VERIFICATION DE LA LISTE CHAINEE
+	** -----------------------------------------------------------------------------------------------
+	** Verifie si la liste chainee a stocke du buffer.
+	** Si oui, parcours le contenu et renvoie dans line la 1ere partie jusqu'a \n
+	** Le reste est de nouveau stocke dans la liste chaine au debut apres avoir supprime l'ancienne.
+	** Si aucun \n n'est trouve, on fait une nouvelle lecture.
+	*/
+	if (stock->next != NULL)
 	{
-		tab = ft_strsplit(next_buff, '\n');
-		if (len_tab(tab) > 1)
+		j = 0;
+		while ((char)(stock->content + j) != '\0')
 		{
-			ft_memdel((void *)line);
-			*line = (char *)malloc((ft_strlen(tab[0]) + 1) * sizeof(*line));
-			*line = tab[0];
-			ft_memdel((void *)&next_buff);
-			next_buff = ft_concat_tab(tab);
-			ft_memdel((void **)tab);
+			if ((char)(stock->content + j) == '\n')
+			{
+				ft_memdel((void *)line);
+				*line = ft_strnew(j);
+				*line = ft_strsub(stock->content, 0, j);
+				new = ft_lstnew(ft_strsub(buf, j + 1, (stock->content_size - j - 1)), (stock->content_size - j - 1));
+				ft_lstdel(stock, del(stock->content, stock->content_size));
+				ft_lstadd(stock, new);
+			}
+			else
+				ret = read(fd, buf, BUFF_SIZE);
 		}
 	}
 	else
+		ret = read(fd, buf, BUFF_SIZE);
+	/*
+	** -----------------------------------------------------------------------------------------------
+	** 								LECTURE DU FICHIER
+	** -----------------------------------------------------------------------------------------------
+	** Si le nbre de charactere lu n'est pas null alors on parcours le buffer.
+	*/
+	if (ret)
 	{
-		count_char = read(fd, buff, BUFF_SIZE);
-		if (count_char)
+		i = -1;
+		while (++i < ret)
 		{
-			i = -1;
-			while (++i < count_char)
+			/*
+			** Si un \n est trouve, on verifie si la liste chainee est vide ou non
+			** Si elle n'est pas vide, on renvoie line avec le restant de la liste et le debut de buffer jusqu'au 1er \n
+			** Le reste est stocke dans une liste chaine a la fin, apres avoir delete la struct precedente.
+			** Si elle est vide, on renvoie seulement le debut du buffer jusqu'au 1er \n
+			** et on stocke le reste dans la liste chainee a la fin.
+			*/
+			if (buf[i] == '\n')
 			{
-				printf("i = %d \n", i);
-				if (buff[i] == '\n')
+				if (stock->next != NULL)
 				{
-					printf("|8|Point ");
-					if (next_buff)
-					{
-						printf("|7|Point ");
-						//printf("Debut_buff <%s> Fin_buff\n", next_buff);
-						tab = ft_strsplit(next_buff, '\n');
-						//ft_print_words_tables(tab);
-						if (len_tab(tab) > 1)
-						{
-							ft_memdel((void *)line);
-							*line = (char *)malloc((ft_strlen(tab[0]) + 1) * sizeof(*line));
-							*line = tab[0];
-							ft_memdel((void *)&next_buff);
-							next_buff = ft_concat_tab(tab);
-							ft_memdel((void **)tab);
-							printf("|2|Point ");
-							//printf("\n<<%s>>\n", next_buff);
-						}
-						else
-						{
-							printf("|3|Point ");
-							ft_memdel((void *)line);
-							*line = ft_strjoin(next_buff, ft_strsub(buff, 0, i));
-							ft_memdel((void *)&next_buff);
-						}
-					}
-					else
-					{
-						printf("|1|Point ");
-						*line = ft_strsub(buff, 0, i);
-						next_buff = ft_strsub(buff, i + 1, (count_char - i - 1));
-					}
-					return (1);
-				}
-				else if (buff[i] == '\0')
-				{
-					printf("|4|Point ");
-					*line = ft_strsub(buff, 0, i);
-					return (0);
-				}
-			}
-			if (i == count_char)
-			{
-				if (next_buff)
-				{
-					printf("|5|Point ");
-					*line = ft_strjoin(next_buff, ft_strsub(buff, 0, i));
+					printf("|2|Point ");
+					ft_memdel((void *)line);
+					*line = ft_strnew(i);
+					*line = ft_strjoin(stock->content, ft_strsub(buf, 0, i));
+					stock = ft_lstnew(ft_strsub(buf, i + 1, (ret - i - 1)), (ret - i - 1));
+					ft_lstadd_end(stock, new);
 				}
 				else
 				{
-					printf("|6|Point ");
-					next_buff = ft_strsub(buff, 0, count_char);
+					printf("|1|Point ");
+					ft_memdel((void *)line);
+					*line = ft_strnew(i);
+					*line = ft_strsub(buf, 0, i);
+					new = ft_lstnew(ft_strsub(buf, i + 1, (ret - i - 1)), (ret - i - 1));
+					ft_lstadd_end(stock, new);
 				}
+				return (1);
 			}
-			count_char = read(fd, buff, BUFF_SIZE);
+			/*
+			** ---------------------------------------------------------------------------------------------------
+			** Si un \0 est trouve alors la lecture est terminee, on verifie si la liste chainee est vide ou non
+			** Si elle n'est pas vide, on renvoie line avec le restant de la liste et le debut de buffer jusqu'au 1er \n
+			** Il n'y a plus rien a stocker.
+			** Si elle est vide, on renvoie seulement le debut du buffer jusqu'au 1er \n
+			** Il n'y a plus rien a stocker.
+			*/
+			else if (buf[i] == '\0')
+			{
+				if (stock->next != NULL)
+				{
+					ft_memdel((void *)line);
+					*line = ft_strnew(i);
+					*line = ft_strjoin(stock->content, ft_strsub(buf, 0, i));
+				}
+				else
+				{
+					ft_memdel((void *)line);
+					*line = ft_strnew(i);
+					*line = ft_strsub(buf, 0, i);
+				}
+				return (0);
+			}
 		}
 	}
 	return (-1);
