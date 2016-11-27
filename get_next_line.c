@@ -20,7 +20,7 @@ int		get_next_line(const int fd, char **line)
 	int				ret;
 	int				i;
 	int				j;
-	char			buf[BUFF_SIZE + 1];
+	char			*buf;
 	static t_list	*stock = NULL;
 	t_list			*new;
 	int				next_line;
@@ -62,39 +62,35 @@ int		get_next_line(const int fd, char **line)
 	** -----------------------------------------------------------------------------------------------
 	** Si le nbre de charactere lu n'est pas null alors on parcours le buffer.
 	*/
+	buf = (char *)malloc((BUFF_SIZE + 1) * sizeof(buf));
 	while ((ret = read(fd, buf, BUFF_SIZE)))
 	{
 		ft_putstr("test1\n");
 		i = 0;
+		/*
+		** ---------------------------------------------------------------------------------------------------
+		** Si un \0 est trouve alors la lecture est terminee, on verifie si la liste chainee est vide ou non
+		** Si elle n'est pas vide, on renvoie line avec le restant de la liste et le debut de buffer jusqu'au 1er \n
+		** Il n'y a plus rien a stocker.
+		** Si elle est vide, on renvoie seulement le debut du buffer jusqu'au 1er \n
+		** Il n'y a plus rien a stocker.
+		*/
+		if (ret < BUFF_SIZE)
+		{
+			ft_putstr("test14");
+			if (stock && ft_strchr(CONTENT, '\n') != NULL)
+			{
+				ft_putstr("test11");
+				ft_memdel((void *)line);
+				//*line = ft_strnew(i + SIZE);
+				*line = ft_strjoin(CONTENT, ft_strsub(buf, 0, ret));
+				return (0);
+			}
+		}
 		while (i < ret)
 		{
 			printf("test 2 : %c --> %d\n", buf[i], i);
-			/*
-			** ---------------------------------------------------------------------------------------------------
-			** Si un \0 est trouve alors la lecture est terminee, on verifie si la liste chainee est vide ou non
-			** Si elle n'est pas vide, on renvoie line avec le restant de la liste et le debut de buffer jusqu'au 1er \n
-			** Il n'y a plus rien a stocker.
-			** Si elle est vide, on renvoie seulement le debut du buffer jusqu'au 1er \n
-			** Il n'y a plus rien a stocker.
-			*/
-			if (ret < BUFF_SIZE)
-			{
-				if (stock->next != NULL)
-				{
-					ft_putstr("test11");
-					ft_memdel((void *)line);
-					//*line = ft_strnew(i + SIZE);
-					*line = ft_strjoin(CONTENT, ft_strsub(buf, 0, i));
-				}
-				else
-				{
-					ft_putstr("test12");
-					ft_memdel((void *)line);
-					//*line = ft_strnew(i);
-					*line = ft_strsub(buf, 0, i);
-				}
-				return (0);
-			}
+
 			/*
 			** ---------------------------------------------------------------------------------------------------------
 			** Si un \n est trouve, on verifie si la liste chainee est vide ou non
