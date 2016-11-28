@@ -6,7 +6,7 @@
 /*   By: clegoube <clegoube@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/27 17:39:12 by clegoube          #+#    #+#             */
-/*   Updated: 2016/11/27 17:40:15 by clegoube         ###   ########.fr       */
+/*   Updated: 2016/11/28 09:25:20 by clegoube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,22 +66,6 @@ int		if_i_inf_ret(t_list **stock, char **line, char *buf, int ret)
 	return (i);
 }
 
-void	if_i_equal_ret(t_list **stock, char *buf, int ret, int i)
-{
-	t_list			*new;
-
-	new = NULL;
-	if (i == ret)
-	{
-		if (stock)
-			new = ft_lstnew(ft_strjoin((*stock)->content, ft_strsub(buf, 0, \
-				ft_strlen(buf))), ret + (*stock)->content_size);
-		else
-			new = ft_lstnew(buf, ret);
-		*stock = new;
-	}
-}
-
 int		if_ret_inf_size(t_list **stock, char **line, char *buf, int ret)
 {
 	if (ret < BUFF_SIZE)
@@ -94,6 +78,22 @@ int		if_ret_inf_size(t_list **stock, char **line, char *buf, int ret)
 		}
 	}
 	return (-1);
+}
+
+void	if_i_equal_ret(t_list **stock, char *buf, int ret, int i)
+{
+	t_list			*new;
+
+	new = NULL;
+	if (i == ret)
+	{
+		if (*stock)
+			new = ft_lstnew(ft_strjoin((*stock)->content, ft_strsub(buf, 0, \
+				ft_strlen(buf))), ret + (*stock)->content_size);
+		else
+			new = ft_lstnew(buf, ret);
+		*stock = new;
+	}
 }
 
 int		get_next_line(const int fd, char **line)
