@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_fd.c                                 :+:      :+:    :+:   */
+/*   get_next_line_fd2.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clegoube <clegoube@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/27 17:39:12 by clegoube          #+#    #+#             */
-/*   Updated: 2016/12/21 17:45:32 by clegoube         ###   ########.fr       */
+/*   Updated: 2016/11/30 08:52:28 by clegoube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ t_buff	*ft_lstnewbuf(char *buffer, int fd)
 	else
 	{
 		new->buffer = (void*)malloc(ft_strlen(buffer) + 1);
-		new->buffer = ft_memcpy(new->buffer, (void*)buffer,
+		new->buffer = ft_memcpy(new->buffer, (void*)buffer, \
 		ft_strlen(buffer) + 1);
 		new->fd = fd;
 	}
@@ -50,7 +50,7 @@ int		if_stock_exist(t_list **stock, char **line, t_var *var)
 			ft_memdel((void *)line);
 			*line = ft_strsub(BUFFER, 0, j);
 			size = (*stock)->content_size - j - 1;
-			buffer = ft_lstnewbuf(ft_strsub(BUFFER,
+			buffer = ft_lstnewbuf(ft_strsub(BUFFER, \
 					j + 1, size), var->fd);
 			new = ft_lstnew(buffer, size);
 			ft_structdelete(*stock);
@@ -91,7 +91,7 @@ int		if_ret_inf_size(t_list **stock, char **line, char *buf, t_var *var)
 		if (*stock && ft_strchr(BUFFER, '\n') != NULL)
 		{
 			ft_memdel((void *)line);
-			*line = ft_strjoin(BUFFER,
+			*line = ft_strjoin(BUFFER, \
 					ft_strsub(buf, 0, var->ret));
 			return (0);
 		}
@@ -109,7 +109,7 @@ void	if_i_equal_ret(t_list **stock, char *buf, t_var *var)
 	{
 		if (*stock)
 		{
-			buffer = ft_lstnewbuf(ft_strjoin(BUFFER,
+			buffer = ft_lstnewbuf(ft_strjoin(BUFFER, \
 					ft_strsub(buf, 0, ft_strlen(buf))), var->fd);
 			new = ft_lstnew(buffer, var->ret + (*stock)->content_size);
 		}
@@ -132,7 +132,7 @@ int		get_next_line(const int fd, char **line)
 	var->ret = 0;
 	var->fd = fd;
 	if (fd == -1)
-		return (-1);
+		return (1);
 	while (stock && ((t_buff *)(stock->content))->fd != fd)
 	{
 		printf("\nstock-content : %d - %d\n", ((t_buff *)(stock->content))->fd, fd);

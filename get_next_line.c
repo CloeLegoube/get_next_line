@@ -6,7 +6,7 @@
 /*   By: clegoube <clegoube@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/27 17:39:12 by clegoube          #+#    #+#             */
-/*   Updated: 2016/11/28 09:25:20 by clegoube         ###   ########.fr       */
+/*   Updated: 2016/12/21 19:44:15 by clegoube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,18 +102,16 @@ int		get_next_line(const int fd, char **line)
 	int				i;
 	char			*buf;
 	static t_list	*stock = NULL;
-	int				next_line;
 
 	ret = 0;
-	next_line = 0;
 	if (stock)
-	{
 		if (if_stock_exist(&stock, line) == 1)
 			return (1);
-	}
 	buf = (char *)malloc((BUFF_SIZE + 1) * sizeof(buf));
 	while ((ret = read(fd, buf, BUFF_SIZE)))
 	{
+		if (ret == -1)
+			return (-1);
 		if (if_ret_inf_size(&stock, line, buf, ret) == 0)
 			return (0);
 		if (if_i_inf_ret(&stock, line, buf, ret) == -1 ||
@@ -121,5 +119,11 @@ int		get_next_line(const int fd, char **line)
 			return (1);
 		if_i_equal_ret(&stock, buf, ret, i);
 	}
+	if (ret == 0)
+	{
+		*line = 0;
+		return (0);
+	}
+
 	return (-1);
 }

@@ -6,14 +6,14 @@
 /*   By: clegoube <clegoube@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/27 17:39:12 by clegoube          #+#    #+#             */
-/*   Updated: 2016/12/21 17:45:32 by clegoube         ###   ########.fr       */
+/*   Updated: 2016/11/28 19:18:57 by clegoube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <stdio.h>
 
-t_buff	*ft_lstnewbuf(char *buffer, int fd)
+t_buff	*ft_lstnewbuff(char *buffer, int fd)
 {
 	t_buff	*new;
 
@@ -28,14 +28,14 @@ t_buff	*ft_lstnewbuf(char *buffer, int fd)
 	else
 	{
 		new->buffer = (void*)malloc(ft_strlen(buffer) + 1);
-		new->buffer = ft_memcpy(new->buffer, (void*)buffer,
+		new->buffer = ft_memcpy(new->buffer, (void*)buffer, \
 		ft_strlen(buffer) + 1);
 		new->fd = fd;
 	}
 	return (new);
 }
 
-int		if_stock_exist(t_list **stock, char **line, t_var *var)
+int		if_stock_exist(t_list **stock, char **line, int fd)
 {
 	int				j;
 	t_list			*new;
@@ -43,15 +43,15 @@ int		if_stock_exist(t_list **stock, char **line, t_var *var)
 	int				size;
 
 	j = 0;
-	while ((*(char *)(BUFFER + j)) != '\0')
+	while ((*(char *)(CT((*stock)->content)->buffer + j)) != '\0')
 	{
-		if ((*(char *)(BUFFER + j)) == '\n')
+		if ((*(char *)(CT((*stock)->content)->buffer + j)) == '\n')
 		{
 			ft_memdel((void *)line);
-			*line = ft_strsub(BUFFER, 0, j);
+			*line = ft_strsub(CT((*stock)->content)->buffer, 0, j);
 			size = (*stock)->content_size - j - 1;
-			buffer = ft_lstnewbuf(ft_strsub(BUFFER,
-					j + 1, size), var->fd);
+			buffer = ft_lstnewbuff(ft_strsub(CT((*stock)->content)->buffer, \
+					j + 1, size), fd);
 			new = ft_lstnew(buffer, size);
 			ft_structdelete(*stock);
 			ft_lstadd(stock, new);
@@ -64,34 +64,45 @@ int		if_stock_exist(t_list **stock, char **line, t_var *var)
 
 int		if_i_inf_ret(t_list **stock, char **line, char *buf, t_var *var)
 {
+	int				i;
 	t_list			*new;
 	t_buff			*buffer;
 
-	var->i = -1;
-	while (++var->i < var->ret)
+	i = -1;
+	while (++i < var->ret)
 	{
-		if (buf[var->i] == '\n' || buf[var->i] == '\0')
+		if (buf[i] == '\n' || buf[i] == '\0')
 		{
 			ft_memdel((void *)line);
-			*line = *stock ? ft_strjoin(BUFFER, ft_strsub(buf, 0, var->i)) :
-				ft_strsub(buf, 0, var->i);
-			buffer = ft_lstnewbuf(ft_strsub(buf, var->i + 1, RET), var->fd);
-			new = ft_lstnew(buffer, RET);
+			if (*stock)
+			{
+				*line = ft_strnew(i + (*stock)->content_size);
+				*line = ft_strjoin(CT((*stock)->content)->buffer, \
+					ft_strsub(buf, 0, i));
+				buffer = ft_lstnewbuff(ft_strsub(buf, i + 1, RET), var->fd);
+				new = ft_lstnew(buffer, RET);
+			}
+			else
+			{
+				*line = ft_strsub(buf, 0, i);
+				buffer = ft_lstnewbuff(ft_strsub(buf, i + 1, RET), var->fd);
+				new = ft_lstnew(buffer, RET);
+			}
 			*stock = new;
 			return (-1);
 		}
 	}
-	return (0);
+	return (i);
 }
 
 int		if_ret_inf_size(t_list **stock, char **line, char *buf, t_var *var)
 {
 	if (var->ret < BUFF_SIZE)
 	{
-		if (*stock && ft_strchr(BUFFER, '\n') != NULL)
+		if (*stock && ft_strchr(CT((*stock)->content)->buffer, '\n') != NULL)
 		{
 			ft_memdel((void *)line);
-			*line = ft_strjoin(BUFFER,
+			*line = ft_strjoin(CT((*stock)->content)->buffer, \
 					ft_strsub(buf, 0, var->ret));
 			return (0);
 		}
@@ -109,13 +120,13 @@ void	if_i_equal_ret(t_list **stock, char *buf, t_var *var)
 	{
 		if (*stock)
 		{
-			buffer = ft_lstnewbuf(ft_strjoin(BUFFER,
-					ft_strsub(buf, 0, ft_strlen(buf))), var->fd);
+			buffer = ft_lstnewbuff(ft_strjoin(CT((*stock)->content)->buffer, \
+						ft_strsub(buf, 0, ft_strlen(buf))), var->fd);
 			new = ft_lstnew(buffer, var->ret + (*stock)->content_size);
 		}
 		else
 		{
-			buffer = ft_lstnewbuf(buf, var->fd);
+			buffer = ft_lstnewbuff(buf, var->fd);
 			new = ft_lstnew(buffer, var->ret);
 		}
 		*stock = new;
@@ -128,29 +139,23 @@ int		get_next_line(const int fd, char **line)
 	static t_list	*stock = NULL;
 	t_var			*var;
 
-	var = (t_var*)malloc(sizeof(t_var));
+	var = NULL;
 	var->ret = 0;
 	var->fd = fd;
-	if (fd == -1)
-		return (-1);
-	while (stock && ((t_buff *)(stock->content))->fd != fd)
-	{
-		printf("\nstock-content : %d - %d\n", ((t_buff *)(stock->content))->fd, fd);
+	while (stock && CT((stock)->content)->fd != fd)
 		stock = stock->next;
-	}
-	if (stock)
-		if (if_stock_exist(&stock, line, var) == 1)
+	if (stock && CT((stock)->content)->fd == fd)
+		if (if_stock_exist(&stock, line, fd) == 1)
 			return (1);
 	buf = (char *)malloc((BUFF_SIZE + 1) * sizeof(buf));
 	while ((var->ret = read(fd, buf, BUFF_SIZE)))
 	{
 		if (if_ret_inf_size(&stock, line, buf, var) == 0)
 			return (0);
-		if (if_i_inf_ret(&stock, line, buf, var) == -1)
+		if (if_i_inf_ret(&stock, line, buf, var) == -1 ||
+			((var->i = if_i_inf_ret(&stock, line, buf, var)) && 0))
 			return (1);
 		if_i_equal_ret(&stock, buf, var);
 	}
-	if (var->ret == 0)
-		return (0);
 	return (-1);
 }

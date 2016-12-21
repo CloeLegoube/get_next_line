@@ -3,7 +3,8 @@
 # define BUFF_SIZE 32
 # define SIZE (stock->content_size)
 # define CONTENT (stock->content)
-# define RET ((var->ret) - (var->i) - 1)
+// # define RET ((var->ret) - (var->i) - 1)
+# define RET (ret - i - 1)
 # define T_SIZE (*SIZE - j - 1)
 # define CT(pointeur) ((t_buff *)(pointeur))
 # define BUFFER CT((*stock)->content)->buffer
