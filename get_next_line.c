@@ -6,7 +6,7 @@
 /*   By: clegoube <clegoube@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/28 13:21:02 by clegoube          #+#    #+#             */
-/*   Updated: 2016/12/30 17:56:38 by clegoube         ###   ########.fr       */
+/*   Updated: 2016/12/30 18:31:30 by clegoube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,26 +36,26 @@ t_buff	*ft_lstnewbuf(char *buffer, int fd)
 	return (new);
 }
 
+void	line_and_stock(char *stock, char **line, char line_until, char *stock_until)
+{
+	*line = ft_strsub(stock, 0, line_until);
+	stock = ft_strcpy(stock, stock_until);
+}
 
-int		get_lines(t_list **stock, char **line, int fd)
+int		get_lines(char *stock, char **line)
 {
 	char			*tmp;
-	char			*buffer;
 
-	if ((tmp = ft_strchr(((t_buff *)(stock->content))->buffer, '\n')))
+	if ((tmp = ft_strchr(stock, '\n')))
 	{
-		*line = ft_strsub(((t_buff *)(stock->content))->buffer, 0, tmp - ((t_buff *)(stock->content))->buffer);
-		buffer = ft_lstnewbuf(ft_strcpy(((t_buff *)(stock->content))->buffer, tmp + 1), fd);
-		new = ft_lstnew(buffer, ft_strlen(buffer));
-		ft_structdelete(*stock);
-		ft_lstadd(stock, new);
+		line_and_stock(stock, line, (tmp - stock), (tmp + 1));
 		tmp = NULL;
 		return (1);
 	}
 	return (0);
 }
 
-int		ret_inf_zero(t_list **stock, char **line, int ret)
+int		ret_inf_zero(char *stock, char **line, int ret)
 {
 	char			*tmp;
 
@@ -65,20 +65,19 @@ int		ret_inf_zero(t_list **stock, char **line, int ret)
 	{
 		if ((tmp = ft_strchr(stock, '\n')) != NULL) // ici tu verifie que ta lecture est terminee mais stock pas nulle
 		{
-			*line = ft_strsub(stock, 0, (tmp - stock));
-			stock = ft_strcpy(stock, tmp + 1);
+			line_and_stock(stock, line, (tmp - stock), (tmp + 1));
 			return (1); // au prochain appel, il ne peut pas y avoir un '/n' et un '/0'
 		}
 		if (tmp == NULL && ft_strcmp(stock, "\0") != 0) //ca gere le cas ou il n'y a pas de '/n' a la fin
 		{
-			*line = ft_strsub(stock, 0, ft_strchr(stock, '\0') - stock);
-			stock = ft_strcpy(stock, ft_strchr(stock, '\0'));
+			line_and_stock(stock, line, (ft_strchr(stock, '\0') - stock), ft_strchr(stock, '\0'));
 			return (1);
 		}
 		free(tmp);
 	}
 	return (0);
 }
+
 
 int				get_next_line(int const fd, char **line)
 {
