@@ -6,7 +6,7 @@
 /*   By: clegoube <clegoube@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/28 13:21:02 by clegoube          #+#    #+#             */
-/*   Updated: 2016/12/30 16:50:23 by clegoube         ###   ########.fr       */
+/*   Updated: 2016/12/30 17:56:38 by clegoube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,48 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-int		get_lines(char *stock, char **line)
+t_buff	*ft_lstnewbuf(char *buffer, int fd)
+{
+	t_buff	*new;
+
+	new = (t_buff*)malloc(sizeof(t_buff));
+	if (new == NULL)
+		return (NULL);
+	if (buffer == NULL)
+	{
+		new->buffer = NULL;
+		new->fd = 0;
+	}
+	else
+	{
+		new->buffer = (void*)malloc(ft_strlen(buffer) + 1);
+		new->buffer = ft_memcpy(new->buffer, (void*)buffer, \
+		ft_strlen(buffer) + 1);
+		new->fd = fd;
+	}
+	return (new);
+}
+
+
+int		get_lines(t_list **stock, char **line, int fd)
 {
 	char			*tmp;
+	char			*buffer;
 
-	if ((tmp = ft_strchr(stock, '\n')))
+	if ((tmp = ft_strchr(((t_buff *)(stock->content))->buffer, '\n')))
 	{
-		*line = ft_strsub(stock, 0, tmp - stock);
-		stock = ft_strcpy(stock, tmp + 1);
+		*line = ft_strsub(((t_buff *)(stock->content))->buffer, 0, tmp - ((t_buff *)(stock->content))->buffer);
+		buffer = ft_lstnewbuf(ft_strcpy(((t_buff *)(stock->content))->buffer, tmp + 1), fd);
+		new = ft_lstnew(buffer, ft_strlen(buffer));
+		ft_structdelete(*stock);
+		ft_lstadd(stock, new);
 		tmp = NULL;
 		return (1);
 	}
 	return (0);
 }
 
-int		ret_inf_zero(char *stock, char **line, int ret)
+int		ret_inf_zero(t_list **stock, char **line, int ret)
 {
 	char			*tmp;
 
@@ -55,13 +82,27 @@ int		ret_inf_zero(char *stock, char **line, int ret)
 
 int				get_next_line(int const fd, char **line)
 {
-	static char		*stock;
+	// static char		*stock;
 	char			buf[BUFF_SIZE + 1];
 	char			*tmp;
 	int				ret;
+	static t_list	*stock = NULL;
 
+	while (stock && ((t_buff *)(stock->content))->fd != fd)
+	{
+		printf("\nstock-content : %d - %d\n", ((t_buff *)(stock->content))->fd, fd);
+		stock = stock->next;
+	}
+	// ft_memdel((void *)line);
+	// *line = ft_strsub(BUFFER, 0, j);
+	// size = (*stock)->content_size - j - 1;
+	// buffer = ft_lstnewbuf(ft_strsub(BUFFER,
+	// 		j + 1, size), var->fd);
+	// new = ft_lstnew(buffer, size);
+	// ft_structdelete(*stock);
+	// ft_lstadd(stock, new);
 	if (stock)
-		if (get_lines(stock, line))
+		if (get_lines(stock, line, fd))
 			return (1);
 	while ((ret = read(fd, buf, BUFF_SIZE)) > 0)
 	{
@@ -70,7 +111,7 @@ int				get_next_line(int const fd, char **line)
 		free(stock);
 		stock = ft_strdup(tmp);
 		free(tmp);
-		if (get_lines(stock, line))
+		if (get_lines(stock, line, fd))
 			return (1);
 	}
 	return (ret_inf_zero(stock, line, ret));
