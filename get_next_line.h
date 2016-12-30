@@ -1,6 +1,6 @@
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
-# define BUFF_SIZE 32
+# define BUFF_SIZE 999
 # define SIZE (stock->content_size)
 # define CONTENT (stock->content)
 // # define RET ((var->ret) - (var->i) - 1)
@@ -34,6 +34,7 @@ typedef	struct	s_list
 {
 	void			*content;
 	size_t			content_size;
+	size_t			k;
 	struct s_list	*next;
 }				t_list;
 
@@ -60,5 +61,9 @@ void		ft_structdelete(t_list *astruct);
 t_buff		*ft_lstnewbuff(char *buffer, int fd);
 void		*ft_memcpy(void *dst, const void *src, size_t n);
 char		*ft_strdup(const char *s1);
+int			ft_strcmp(const char *s1, const char *s2);
+int			ft_strncmp(const char *s1, const char *s2, size_t n);
+char		*ft_strncpy(char *dst, const char *src, size_t len);
+char		*ft_strcpy(char *dst, const char *src);
 
 #endif

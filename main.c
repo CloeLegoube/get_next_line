@@ -6,7 +6,7 @@
 /*   By: clegoube <clegoube@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/25 15:18:40 by clegoube          #+#    #+#             */
-/*   Updated: 2016/12/21 19:11:42 by clegoube         ###   ########.fr       */
+/*   Updated: 2016/12/30 15:40:50 by clegoube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,13 +51,14 @@ int main(int argc, char **argv)
 	// if (ft_open(fd2) == 1)
 	// 	return (1);
 	i = 0;
-	gnl = get_next_line(fd1, line);
-	while (gnl == 1)
+	// gnl = get_next_line(fd1, line);
+	while ((gnl = get_next_line(fd1, line)) > 0)
 	{
-		printf("\n%d) GNL:%d | fd: %d - %s", i, gnl, fd1, *line);
-		gnl = get_next_line(fd1, line);
+		printf("\n%d) GNL:%d | fd: %d - %s\n", i, gnl, fd1, *line);
+		// gnl = get_next_line(fd1, line);
 		i++;
 	}
+	printf("\nend) GNL:%d ", gnl);
 	// get_next_line(fd1, line);
 	// printf("\n1) fd = %d - %s", fd1, *line);
 	// // get_next_line(fd2, line);
