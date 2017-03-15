@@ -23,11 +23,9 @@ static int			by_word(char *str, char charset)
 {
 	int chaine;
 	int mot;
-	int lettre;
 
 	chaine = 0;
 	mot = 0;
-	lettre = 0;
 	while (str[chaine])
 	{
 		if (!ft_check_special_char(str[chaine], charset) && str[chaine])
