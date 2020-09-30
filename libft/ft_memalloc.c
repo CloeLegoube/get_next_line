@@ -23,11 +23,10 @@ void		*ft_memalloc(size_t size)
 	dest = (char *)malloc((size + 1) * sizeof(*dest));
 	if (dest == NULL)
 		return (NULL);
-	dest[i + size] = '\0';
-	while (i < size)
-	{
+/*	 dest[i + size] = '\0'; 						 */
+	for(i=0;i < size;i++)
 		dest[i] = '\0';
-		i++;
-	}
+	dest[i]='\0';
+	
 	return (dest);
 }
